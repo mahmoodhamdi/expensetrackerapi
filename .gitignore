@@ -1,8 +1,17 @@
-HELP.md
+# Maven
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+# Spring Boot
+spring-boot-devtools.properties
+*.h2.db
+
+# Logs
+*.log
+logs/
+*.tmp
 
 ### STS ###
 .apt_generated
@@ -31,3 +40,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Misc OS files
+.DS_Store
+Thumbs.db
