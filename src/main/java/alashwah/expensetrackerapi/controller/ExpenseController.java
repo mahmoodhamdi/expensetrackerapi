@@ -2,6 +2,7 @@ package alashwah.expensetrackerapi.controller;
 
 import alashwah.expensetrackerapi.entity.Expense;
 import alashwah.expensetrackerapi.service.ExpenseService;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,4 +25,9 @@ public List<Expense> getAllExpense(){
         return expenseService.getExpenseById(id);
 }
 
+@DeleteMapping("/expenses/{id}")
+    public void deleteExpenseById(@PathVariable("id") Long id){
+        expenseService.deleteExpenseById(id);
+
+}
 }
