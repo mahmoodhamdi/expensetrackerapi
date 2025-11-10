@@ -1,17 +1,20 @@
-CREATE DATABASE expensetracker;
-
+-- إنشاء قاعدة البيانات
+CREATE DATABASE IF NOT EXISTS expensetracker;
 USE expensetracker;
 
-CREATE TABLE tbl_expenses
-(
-	id INT PRIMARY KEY AUTO_INCREMENT,
-    expense_name VARCHAR(255) NOT NULL,
-    description VARCHAR(255) NOT NULL,
-    expense_amount DOUBLE(5, 2) NOT NULL,
-    category VARCHAR(255) NOT NULL,
-    date DATE NOT NULL
+-- إنشاء الجدول مع الأعمدة الجديدة (timestamps)
+CREATE TABLE IF NOT EXISTS tbl_expenses (
+                                            id INT PRIMARY KEY AUTO_INCREMENT,
+                                            expense_name VARCHAR(255) NOT NULL,
+                                            description VARCHAR(255) NOT NULL,
+                                            expense_amount DOUBLE(10, 2) NOT NULL,
+                                            category VARCHAR(255) NOT NULL,
+                                            date DATE NOT NULL,
+                                            created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                                            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- إدخال بيانات تجريبية (seed data)
 INSERT INTO tbl_expenses (expense_name, description, expense_amount, category, date)
 VALUES
     ("Water bill", "water bill", 600.00, "Bills", "2021-10-14"),
