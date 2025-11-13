@@ -2,6 +2,7 @@ package alashwah.expensetrackerapi.controller;
 
 import alashwah.expensetrackerapi.entity.Expense;
 import alashwah.expensetrackerapi.service.ExpenseService;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +20,8 @@ public class ExpenseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Expense>> getAllExpenses() {
-        return ResponseEntity.ok(expenseService.getAllExpenses());
+    public ResponseEntity<List<Expense>> getAllExpenses(Pageable pageable) {
+        return ResponseEntity.ok(expenseService.getAllExpenses(pageable).toList());
     }
 
     @GetMapping("/{id}")
