@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +42,7 @@ public class LanguageService {
                 .code(request.getCode())
                 .name(request.getName())
                 .nameLocal(request.getNameLocal())
-                .dictionary(new HashMap<>())
+                .dictionaryEntries(new ArrayList<>())
                 .build();
 
         // Add dictionary entries if provided
@@ -53,7 +53,7 @@ public class LanguageService {
                         .word(entry.getKey())
                         .translation(entry.getValue())
                         .build();
-                language.getDictionary().put(entry.getKey(), dict);
+                language.getDictionaryEntries().add(dict);
             }
         }
 
@@ -74,7 +74,7 @@ public class LanguageService {
             Map<String, String> newDict = (Map<String, String>) updates.get("dictionary");
 
             // Clear existing dictionary
-            language.getDictionary().clear();
+            language.getDictionaryEntries().clear();
 
             // Add new entries
             for (Map.Entry<String, String> entry : newDict.entrySet()) {
@@ -83,7 +83,7 @@ public class LanguageService {
                         .word(entry.getKey())
                         .translation(entry.getValue())
                         .build();
-                language.getDictionary().put(entry.getKey(), dict);
+                language.getDictionaryEntries().add(dict);
             }
         }
 

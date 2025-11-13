@@ -43,9 +43,10 @@ public class LanguageController {
             languages = languageService.getAllLanguages();
         }
 
-        ApiResponse<List<Language>> response = ApiResponse.success(
+        ApiResponse<List<Language>> response = ApiResponse.successWithCount(
                 "Languages retrieved successfully",
-                languages
+                languages,
+                languages.size()
         );
 
         return ResponseEntity.ok(response);
