@@ -3,10 +3,14 @@ package alashwah.expensetrackerapi.service;
 import alashwah.expensetrackerapi.entity.Expense;
 import alashwah.expensetrackerapi.exception.ResourceNotFoundException;
 import alashwah.expensetrackerapi.repository.ExpenseRepository;
+import alashwah.expensetrackerapi.specification.ExpenseSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -21,6 +25,33 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     public Page<Expense> getAllExpenses(Pageable pageable) {
         return expenseRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<Expense> getFilteredExpenses(
+            String expenseName,
+            String description,
+            Double minAmount,
+            Double maxAmount,
+            String category,
+            LocalDate startDate,
+            LocalDate endDate,
+            LocalDateTime createdAfter,
+            LocalDateTime createdBefore,
+            Pageable pageable
+    ) {
+        Specification<Expense> spec = ExpenseSpecification.filterBy(
+                expenseName,
+                description,
+                minAmount,
+                maxAmount,
+                category,
+                startDate,
+                endDate,
+                createdAfter,
+                createdBefore
+        );
+        return expenseRepository.findAll(spec, pageable);
     }
 
     @Override

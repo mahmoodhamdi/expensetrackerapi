@@ -7,11 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -32,8 +35,31 @@ public class ExpenseController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Expense>>> getAllExpenses(Pageable pageable) {
-        List<Expense> expenses = expenseService.getAllExpenses(pageable).toList();
+    public ResponseEntity<ApiResponse<List<Expense>>> getAllExpenses(
+            @RequestParam(required = false) String expenseName,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) Double minAmount,
+            @RequestParam(required = false) Double maxAmount,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdAfter,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime createdBefore,
+            Pageable pageable
+    ) {
+        List<Expense> expenses = expenseService.getFilteredExpenses(
+                expenseName,
+                description,
+                minAmount,
+                maxAmount,
+                category,
+                startDate,
+                endDate,
+                createdAfter,
+                createdBefore,
+                pageable
+        ).toList();
+
         ApiResponse<List<Expense>> response = ApiResponse.success(
                 getMessage("success.expense.fetched"),
                 expenses
