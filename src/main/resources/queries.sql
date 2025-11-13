@@ -102,3 +102,32 @@ INSERT INTO tbl_themes (type_theme, color) VALUES
                                                ('blue', '#0066CC'),
                                                ('green', '#00CC66')
 ON DUPLICATE KEY UPDATE type_theme=type_theme;
+
+
+USE expensetracker;
+
+-- Create App Info Table
+CREATE TABLE IF NOT EXISTS tbl_app_info (
+                                            id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                            language_code VARCHAR(10) NOT NULL,
+                                            about_app TEXT NOT NULL,
+                                            privacy_text TEXT NOT NULL,
+                                            created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                                            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP,
+                                            FOREIGN KEY (language_code) REFERENCES tbl_languages(code) ON DELETE CASCADE,
+                                            UNIQUE KEY unique_app_info_language (language_code)
+);
+
+-- Insert seed data for App Info (English)
+INSERT INTO tbl_app_info (language_code, about_app, privacy_text)
+VALUES
+    ('en',
+     'Expense Tracker is your personal finance companion designed to help you manage your daily spending, track your income, and visualize your budget with ease. Stay organized and in control of your finances anytime, anywhere.',
+     'We value your privacy. Expense Tracker does not share or sell your personal data. All information stored in the app is kept securely and used only to enhance your experience. For more details, refer to our privacy policy.');
+
+-- Insert seed data for App Info (Arabic)
+INSERT INTO tbl_app_info (language_code, about_app, privacy_text)
+VALUES
+    ('ar',
+     'تطبيق تتبع المصاريف هو رفيقك المالي الشخصي الذي يساعدك على إدارة نفقاتك اليومية وتتبع دخلك وتنظيم ميزانيتك بسهولة. كن دائمًا على اطلاع على وضعك المالي في أي وقت وأي مكان.',
+     'نحن نحترم خصوصيتك. تطبيق تتبع المصاريف لا يشارك أو يبيع بياناتك الشخصية. جميع المعلومات التي يتم حفظها في التطبيق آمنة وتُستخدم فقط لتحسين تجربتك. لمزيد من التفاصيل، راجع سياسة الخصوصية.');
