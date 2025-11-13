@@ -1,39 +1,39 @@
 package alashwah.expensetrackerapi.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
+
+
+// Privacy Policy Entity
 @Entity
-@Table(name = "tbl_themes", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"type_theme", "color"})
+@Table(name = "tbl_privacy", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"language_code"})
 })
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-public class Theme {
+public class Privacy {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "type_theme", length = 10, nullable = false)
-    private String typeTheme; // 'light' or 'dark' only
+    @Column(name = "language_code", length = 10, nullable = false)
+    private String languageCode;
 
-    @Column(name = "color", length = 20, nullable = false)
-    private String color;
+    @Column(name = "content", columnDefinition = "TEXT", nullable = false)
+    private String content;
 
     @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @LastModifiedDate

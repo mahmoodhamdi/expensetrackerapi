@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class ThemeCreateRequest {
 
     @NotBlank(message = "Theme type is required")
-    @Size(min = 2, max = 50, message = "Theme type must be between 2 and 50 characters")
+    @Pattern(regexp = "^(light|dark)$", message = "Theme type must be either 'light' or 'dark'")
     private String typeTheme;
 
     @NotBlank(message = "Color is required")
@@ -31,17 +31,9 @@ public class ThemeCreateRequest {
 @Builder
 class ThemeUpdateRequest {
 
-    @NotBlank(message = "Color is required")
-    @Pattern(regexp = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$", message = "Color must be a valid hex color")
-    private String color;
-}
-
-// Theme Response
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-class ThemeResponse {
+    @Pattern(regexp = "^(light|dark)$", message = "Theme type must be either 'light' or 'dark'")
     private String typeTheme;
+
+    @Pattern(regexp = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$", message = "Color must be a valid hex color")
     private String color;
 }

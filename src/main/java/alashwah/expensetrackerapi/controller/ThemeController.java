@@ -17,7 +17,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/themes")
-@Tag(name = "Theme Management", description = "APIs for managing application themes")
+@Tag(name = "Theme Management", description = "APIs for managing application themes (light/dark)")
 public class ThemeController {
 
     @Autowired
@@ -28,18 +28,33 @@ public class ThemeController {
     public ResponseEntity<ApiResponse<List<Theme>>> getAllThemes() {
         List<Theme> themes = themeService.getAllThemes();
 
-        ApiResponse<List<Theme>> response = ApiResponse.success(
+        ApiResponse<List<Theme>> response = ApiResponse.successWithCount(
                 "Themes retrieved successfully",
-                themes
+                themes,
+                themes.size()
         );
 
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{typeTheme}")
-    @Operation(summary = "Get theme by type", description = "Retrieve a specific theme by its type")
-    public ResponseEntity<ApiResponse<Theme>> getThemeByType(@PathVariable String typeTheme) {
-        Theme theme = themeService.getThemeByType(typeTheme);
+    @Operation(summary = "Get themes by type", description = "Retrieve all themes of a specific type (light or dark)")
+    public ResponseEntity<ApiResponse<List<Theme>>> getThemesByType(@PathVariable String typeTheme) {
+        List<Theme> themes = themeService.getThemesByType(typeTheme);
+
+        ApiResponse<List<Theme>> response = ApiResponse.successWithCount(
+                "Themes retrieved successfully",
+                themes,
+                themes.size()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/id/{id}")
+    @Operation(summary = "Get theme by ID", description = "Retrieve a specific theme by its ID")
+    public ResponseEntity<ApiResponse<Theme>> getThemeById(@PathVariable Long id) {
+        Theme theme = themeService.getThemeById(id);
 
         ApiResponse<Theme> response = ApiResponse.success(
                 "Theme retrieved successfully",
@@ -50,7 +65,7 @@ public class ThemeController {
     }
 
     @PostMapping
-    @Operation(summary = "Create new theme", description = "Create a new theme")
+    @Operation(summary = "Create new theme", description = "Create a new theme (type must be 'light' or 'dark')")
     public ResponseEntity<ApiResponse<Theme>> createTheme(
             @Valid @RequestBody ThemeCreateRequest request) {
 
@@ -64,23 +79,16 @@ public class ThemeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PutMapping("/{typeTheme}")
+    @PutMapping("/{id}")
     @Operation(summary = "Update theme", description = "Update an existing theme")
     public ResponseEntity<ApiResponse<Theme>> updateTheme(
-            @PathVariable String typeTheme,
+            @PathVariable Long id,
             @RequestBody Map<String, String> body) {
 
+        String typeTheme = body.get("typeTheme");
         String color = body.get("color");
-        if (color == null || color.isBlank()) {
-            throw new IllegalArgumentException("Color is required");
-        }
 
-        // Validate hex color format
-        if (!color.matches("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$")) {
-            throw new IllegalArgumentException("Color must be a valid hex color");
-        }
-
-        Theme theme = themeService.updateTheme(typeTheme, color);
+        Theme theme = themeService.updateTheme(id, typeTheme, color);
 
         ApiResponse<Theme> response = ApiResponse.success(
                 "Theme updated successfully",
@@ -90,10 +98,10 @@ public class ThemeController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{typeTheme}")
-    @Operation(summary = "Delete theme", description = "Delete a theme by its type")
-    public ResponseEntity<ApiResponse<Void>> deleteTheme(@PathVariable String typeTheme) {
-        themeService.deleteTheme(typeTheme);
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete theme", description = "Delete a theme by its ID")
+    public ResponseEntity<ApiResponse<Void>> deleteTheme(@PathVariable Long id) {
+        themeService.deleteTheme(id);
 
         ApiResponse<Void> response = ApiResponse.success(
                 "Theme deleted successfully",
