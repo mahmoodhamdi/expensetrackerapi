@@ -5,9 +5,14 @@ import alashwah.expensetrackerapi.service.ExpenseService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/expenses")
@@ -30,13 +35,13 @@ public class ExpenseController {
     }
 
     @PostMapping
-    public ResponseEntity<Expense> saveExpense(@RequestBody Expense expense) {
+    public ResponseEntity<Expense> saveExpense(@Valid @RequestBody Expense expense) {
         Expense savedExpense = expenseService.saveExpense(expense);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedExpense);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Expense> updateExpense(@PathVariable Long id, @RequestBody Expense expense) {
+    public ResponseEntity<Expense> updateExpense(@PathVariable Long id, @Valid @RequestBody Expense expense) {
         Expense updated = expenseService.updateExpense(id, expense);
         return ResponseEntity.ok(updated);
     }
@@ -46,4 +51,5 @@ public class ExpenseController {
         expenseService.deleteExpenseById(id);
         return ResponseEntity.noContent().build();
     }
+
 }
