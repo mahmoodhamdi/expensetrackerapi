@@ -24,27 +24,27 @@ public class Expense {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Expense name cannot be empty")
-    @Size(max = 100, message = "Expense name must be less than 100 characters")
+    @NotBlank(message = "{validation.expense.name.required}")
+    @Size(max = 100, message = "{validation.expense.name.size}")
     @Column(nullable = false)
     private String expenseName;
 
-    @NotBlank(message = "Description cannot be empty")
-    @Size(max = 255, message = "Description must be less than 255 characters")
+    @NotBlank(message = "{validation.expense.description.required}")
+    @Size(max = 255, message = "{validation.expense.description.size}")
     @Column(nullable = false)
     private String description;
 
-    @NotNull(message = "Expense amount is required")
-    @Positive(message = "Expense amount must be positive")
+    @NotNull(message = "{validation.expense.amount.required}")
+    @Positive(message = "{validation.expense.amount.positive}")
     @Column(nullable = false)
     private Double expenseAmount;
 
-    @NotBlank(message = "Category cannot be empty")
-    @Size(max = 50, message = "Category must be less than 50 characters")
+    @NotBlank(message = "{validation.expense.category.required}")
+    @Size(max = 50, message = "{validation.expense.category.size}")
     @Column(nullable = false)
     private String category;
 
-    @NotNull(message = "Date is required")
+    @NotNull(message = "{validation.expense.date.required}")
     @Column(nullable = false)
     private LocalDate date;
 

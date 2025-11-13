@@ -1,12 +1,12 @@
 package alashwah.expensetrackerapi.service;
 
 import alashwah.expensetrackerapi.entity.Expense;
+import alashwah.expensetrackerapi.exception.ResourceNotFoundException;
 import alashwah.expensetrackerapi.repository.ExpenseRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,13 +26,13 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     public Expense getExpenseById(Long id) {
         return expenseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Expense not found with id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Expense", "id", id));
     }
 
     @Override
     public void deleteExpenseById(Long id) {
         if (!expenseRepository.existsById(id)) {
-            throw new RuntimeException("Cannot delete — expense not found with id " + id);
+            throw new ResourceNotFoundException("Expense", "id", id);
         }
         expenseRepository.deleteById(id);
     }
