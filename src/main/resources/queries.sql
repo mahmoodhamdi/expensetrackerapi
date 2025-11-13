@@ -37,3 +37,68 @@ VALUES
     ("House rent", "Monthly apartment rent", 4500.00, "Housing", "2021-10-01"),
     ("Coffee shop", "Coffee with friends", 120.00, "Food", "2021-10-13"),
     ("Donation", "Charity donation", 200.00, "Charity", "2021-10-18");
+
+
+
+-- Add these tables to your expensetracker database
+
+USE expensetracker;
+
+-- Create Languages Table
+CREATE TABLE IF NOT EXISTS tbl_languages (
+                                             code VARCHAR(10) PRIMARY KEY,
+                                             name VARCHAR(100) NOT NULL,
+                                             name_local VARCHAR(100) NOT NULL,
+                                             created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                                             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Create Dictionary Table
+CREATE TABLE IF NOT EXISTS tbl_dictionary (
+                                              id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                              language_code VARCHAR(10) NOT NULL,
+                                              word VARCHAR(100) NOT NULL,
+                                              translation VARCHAR(255) NOT NULL,
+                                              created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                                              updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP,
+                                              FOREIGN KEY (language_code) REFERENCES tbl_languages(code) ON DELETE CASCADE,
+                                              UNIQUE KEY unique_word_per_language (language_code, word)
+);
+
+-- Create Themes Table
+CREATE TABLE IF NOT EXISTS tbl_themes (
+                                          type_theme VARCHAR(50) PRIMARY KEY,
+                                          color VARCHAR(20) NOT NULL,
+                                          created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                                          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Insert seed data for languages
+INSERT INTO tbl_languages (code, name, name_local) VALUES
+                                                       ('en', 'English', 'English'),
+                                                       ('ar', 'Arabic', 'العربية')
+ON DUPLICATE KEY UPDATE code=code;
+
+-- Insert seed data for dictionary (English)
+INSERT INTO tbl_dictionary (language_code, word, translation) VALUES
+                                                                  ('en', 'hello', 'Hello'),
+                                                                  ('en', 'world', 'World'),
+                                                                  ('en', 'welcome', 'Welcome'),
+                                                                  ('en', 'goodbye', 'Goodbye')
+ON DUPLICATE KEY UPDATE word=word;
+
+-- Insert seed data for dictionary (Arabic)
+INSERT INTO tbl_dictionary (language_code, word, translation) VALUES
+                                                                  ('ar', 'hello', 'مرحبا'),
+                                                                  ('ar', 'world', 'العالم'),
+                                                                  ('ar', 'welcome', 'أهلا وسهلا'),
+                                                                  ('ar', 'goodbye', 'وداعا')
+ON DUPLICATE KEY UPDATE word=word;
+
+-- Insert seed data for themes
+INSERT INTO tbl_themes (type_theme, color) VALUES
+                                               ('light', '#FFFFFF'),
+                                               ('dark', '#121212'),
+                                               ('blue', '#0066CC'),
+                                               ('green', '#00CC66')
+ON DUPLICATE KEY UPDATE type_theme=type_theme;
