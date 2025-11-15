@@ -11,6 +11,11 @@ import java.util.List;
 
 public class ExpenseSpecification {
 
+    public static Specification<Expense> belongsToUser(Long userId) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.equal(root.get("user").get("id"), userId);
+    }
+
     public static Specification<Expense> filterBy(
             String expenseName,
             String description,

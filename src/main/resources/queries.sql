@@ -304,3 +304,92 @@ VALUES
      'نحن نحترم خصوصيتك ونلتزم بحماية بياناتك الشخصية. تطبيق تتبع المصاريف لا يشارك أو يبيع أو يوزع معلوماتك الشخصية لأطراف ثالثة. جميع البيانات المخزنة في التطبيق محفوظة بأمان على جهازك وخوادمنا المشفرة. نستخدم إجراءات أمنية متوافقة مع معايير الصناعة لحماية معلوماتك المالية. تُستخدم بياناتك فقط لتوفير وتحسين تجربة التطبيق. لديك السيطرة الكاملة على بياناتك ويمكنك حذف حسابك في أي وقت. لمزيد من التفاصيل حول كيفية تعاملنا مع معلوماتك، يرجى الاتصال بفريق الدعم لدينا.')
 ON DUPLICATE KEY UPDATE
     content = VALUES(content);
+
+
+
+
+USE expensetracker;
+
+-- ============================================
+-- Create Users Table
+-- ============================================
+
+CREATE TABLE IF NOT EXISTS tbl_users (
+                                         id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                         name VARCHAR(100) NOT NULL,
+                                         email VARCHAR(255) NOT NULL UNIQUE,
+                                         password VARCHAR(255) NOT NULL,
+                                         enabled BOOLEAN DEFAULT TRUE NOT NULL,
+                                         created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                                         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL ON UPDATE CURRENT_TIMESTAMP,
+                                         INDEX idx_email (email)
+);
+
+-- ============================================
+-- Alter Expenses Table to Add User Foreign Key
+-- ============================================
+
+-- Check if user_id column doesn't exist before adding it
+ALTER TABLE tbl_expenses
+    ADD COLUMN IF NOT EXISTS user_id BIGINT;
+
+-- Add foreign key constraint
+ALTER TABLE tbl_expenses
+    ADD CONSTRAINT fk_expense_user
+        FOREIGN KEY (user_id) REFERENCES tbl_users(id) ON DELETE CASCADE;
+
+-- Add index for better query performance
+CREATE INDEX IF NOT EXISTS idx_user_id ON tbl_expenses(user_id);
+
+-- ============================================
+-- Seed Data for Testing (Optional)
+-- ============================================
+
+-- Insert a test user (password is 'password123' hashed with BCrypt)
+-- You should use your application's register endpoint instead in production
+INSERT INTO tbl_users (name, email, password, enabled)
+VALUES (
+           'Test User',
+           'test@example.com',
+           '$2a$10$ZQqX8qPn5K5yqVXn5xGp9.hLQJ6OqL3J8qHzL8Z5jK0kH5mL6qN5e',
+           TRUE
+       ) ON DUPLICATE KEY UPDATE email = email;
+
+-- Note: For existing expenses without user_id, you may want to:
+-- 1. Assign them to a default user
+-- 2. Delete them
+-- 3. Keep them but make user_id nullable (not recommended for new data)
+
+-- Example: Assign existing expenses to the test user (if any)
+-- UPDATE tbl_expenses
+-- SET user_id = (SELECT id FROM tbl_users WHERE email = 'test@example.com' LIMIT 1)
+-- WHERE user_id IS NULL;
+
+-- ============================================
+-- Useful Queries for Testing
+-- ============================================
+
+-- View all users
+SELECT id, name, email, enabled, created_at FROM tbl_users;
+
+-- View expenses with user information
+SELECT
+    e.id,
+    e.expense_name,
+    e.expense_amount,
+    e.category,
+    e.date,
+    u.name as user_name,
+    u.email as user_email
+FROM tbl_expenses e
+         LEFT JOIN tbl_users u ON e.user_id = u.id;
+
+-- Count expenses per user
+SELECT
+    u.name,
+    u.email,
+    COUNT(e.id) as expense_count,
+    SUM(e.expense_amount) as total_amount
+FROM tbl_users u
+         LEFT JOIN tbl_expenses e ON u.id = e.user_id
+GROUP BY u.id, u.name, u.email;

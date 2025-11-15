@@ -1,5 +1,7 @@
 package alashwah.expensetrackerapi.expense.entity;
 
+import alashwah.expensetrackerapi.user.entity.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -47,6 +49,11 @@ public class Expense {
     @NotNull(message = "{validation.expense.date.required}")
     @Column(nullable = false)
     private LocalDate date;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
+    private User user;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)

@@ -4,9 +4,12 @@ import alashwah.expensetrackerapi.expense.entity.Expense;
 import alashwah.expensetrackerapi.exception.ResourceNotFoundException;
 import alashwah.expensetrackerapi.expense.repository.ExpenseRepository;
 import alashwah.expensetrackerapi.expense.specification.ExpenseSpecification;
+import alashwah.expensetrackerapi.security.service.CustomUserDetails;
+import alashwah.expensetrackerapi.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -22,9 +25,19 @@ public class ExpenseServiceImpl implements ExpenseService {
         this.expenseRepository = expenseRepository;
     }
 
+    private User getCurrentUser() {
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
+        return userDetails.getUser();
+    }
+
     @Override
     public Page<Expense> getAllExpenses(Pageable pageable) {
-        return expenseRepository.findAll(pageable);
+        User currentUser = getCurrentUser();
+        return expenseRepository.findAll(
+                ExpenseSpecification.belongsToUser(currentUser.getId()),
+                pageable
+        );
     }
 
     @Override
@@ -40,6 +53,7 @@ public class ExpenseServiceImpl implements ExpenseService {
             LocalDateTime createdBefore,
             Pageable pageable
     ) {
+        User currentUser = getCurrentUser();
         Specification<Expense> spec = ExpenseSpecification.filterBy(
                 expenseName,
                 description,
@@ -50,32 +64,40 @@ public class ExpenseServiceImpl implements ExpenseService {
                 endDate,
                 createdAfter,
                 createdBefore
-        );
+        ).and(ExpenseSpecification.belongsToUser(currentUser.getId()));
+
         return expenseRepository.findAll(spec, pageable);
     }
 
     @Override
     public Expense getExpenseById(Long id) {
-        return expenseRepository.findById(id)
+        User currentUser = getCurrentUser();
+        Expense expense = expenseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Expense", "id", id));
+
+        if (!expense.getUser().getId().equals(currentUser.getId())) {
+            throw new ResourceNotFoundException("Expense not found or you don't have permission to access it");
+        }
+
+        return expense;
     }
 
     @Override
     public void deleteExpenseById(Long id) {
-        if (!expenseRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Expense", "id", id);
-        }
+        Expense expense = getExpenseById(id); // This checks ownership
         expenseRepository.deleteById(id);
     }
 
     @Override
     public Expense saveExpense(Expense expense) {
+        User currentUser = getCurrentUser();
+        expense.setUser(currentUser);
         return expenseRepository.save(expense);
     }
 
     @Override
     public Expense updateExpense(Long id, Expense expense) {
-        Expense existingExpense = getExpenseById(id);
+        Expense existingExpense = getExpenseById(id); // This checks ownership
 
         Optional.ofNullable(expense.getExpenseName())
                 .ifPresent(existingExpense::setExpenseName);
