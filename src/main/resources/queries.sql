@@ -393,3 +393,105 @@ SELECT
 FROM tbl_users u
          LEFT JOIN tbl_expenses e ON u.id = e.user_id
 GROUP BY u.id, u.name, u.email;
+
+
+
+-- ============================================
+-- OTP Table for Email Verification and Password Reset
+-- ============================================
+
+USE expensetracker;
+
+-- Create OTP Table
+CREATE TABLE IF NOT EXISTS tbl_otp (
+                                       id BIGINT PRIMARY KEY AUTO_INCREMENT,
+                                       code VARCHAR(6) NOT NULL,
+                                       user_id BIGINT NOT NULL,
+                                       expires_at DATETIME NOT NULL,
+                                       used BOOLEAN DEFAULT FALSE NOT NULL,
+                                       type VARCHAR(20) NOT NULL,
+                                       created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+
+                                       FOREIGN KEY (user_id) REFERENCES tbl_users(id) ON DELETE CASCADE,
+                                       INDEX idx_user_id (user_id),
+                                       INDEX idx_code (code),
+                                       INDEX idx_type (type),
+                                       INDEX idx_expires_at (expires_at)
+);
+
+-- ============================================
+-- Useful Queries for Testing OTP
+-- ============================================
+
+-- View all OTPs
+SELECT
+    o.id,
+    o.code,
+    u.email,
+    u.name,
+    o.type,
+    o.used,
+    o.expires_at,
+    o.created_at,
+    CASE
+        WHEN o.expires_at < NOW() THEN 'EXPIRED'
+        WHEN o.used = TRUE THEN 'USED'
+        ELSE 'VALID'
+        END as status
+FROM tbl_otp o
+         JOIN tbl_users u ON o.user_id = u.id
+ORDER BY o.created_at DESC;
+
+-- View valid OTPs only
+SELECT
+    o.id,
+    o.code,
+    u.email,
+    o.type,
+    o.expires_at,
+    o.created_at
+FROM tbl_otp o
+         JOIN tbl_users u ON o.user_id = u.id
+WHERE o.used = FALSE
+  AND o.expires_at > NOW()
+ORDER BY o.created_at DESC;
+
+-- Count OTPs by type
+SELECT
+    type,
+    COUNT(*) as total,
+    SUM(CASE WHEN used = TRUE THEN 1 ELSE 0 END) as used_count,
+    SUM(CASE WHEN used = FALSE AND expires_at > NOW() THEN 1 ELSE 0 END) as valid_count,
+    SUM(CASE WHEN expires_at < NOW() THEN 1 ELSE 0 END) as expired_count
+FROM tbl_otp
+GROUP BY type;
+
+-- Find OTP for specific user
+SELECT
+    o.id,
+    o.code,
+    o.type,
+    o.used,
+    o.expires_at,
+    o.created_at,
+    TIMESTAMPDIFF(MINUTE, NOW(), o.expires_at) as minutes_until_expiry
+FROM tbl_otp o
+WHERE o.user_id = (SELECT id FROM tbl_users WHERE email = 'test@example.com' LIMIT 1)
+  AND o.used = FALSE
+  AND o.expires_at > NOW()
+ORDER BY o.created_at DESC;
+
+-- Delete expired and used OTPs (cleanup query)
+DELETE FROM tbl_otp
+WHERE expires_at < NOW() OR used = TRUE;
+
+-- View users with unverified emails
+SELECT
+    id,
+    name,
+    email,
+    enabled,
+    created_at
+FROM tbl_users
+WHERE enabled = FALSE
+ORDER BY created_at DESC;
